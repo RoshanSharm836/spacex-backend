@@ -8,13 +8,16 @@ const loginroutes = express.Router();
 
 loginroutes.get("/header", async (req, res) => {
   try {
-    console.log("kjabsdjks");
     let token = req.headers.authorization;
+    if (token === undefined) {
+      console.log("no token");
+      return res.status(201).send({ message: "No token", auth: false });
+    }
+    console.log("token", token);
     token = token.replace("Bearer ", "");
-    console.log(token);
     const verify = await verifytoken(token);
     console.log(verify);
-    if (verify) {
+    if (verify && token !== undefined) {
       const data = await signup.findById({ _id: verify });
       return res.status(200).send({
         data: { name: data.name, email: data.email, id: data._id },
@@ -24,7 +27,7 @@ loginroutes.get("/header", async (req, res) => {
       return res.status(401).send({ message: "token invalid", auth: false });
     }
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.status(500).send(error.message);
   }
 });
